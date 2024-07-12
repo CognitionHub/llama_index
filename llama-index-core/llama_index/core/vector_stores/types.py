@@ -1,4 +1,5 @@
 """Vector store index types."""
+
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
@@ -15,6 +16,7 @@ from typing import (
 
 import fsspec
 from deprecated import deprecated
+
 from llama_index.core.bridge.pydantic import (
     BaseModel,
     StrictFloat,
@@ -63,6 +65,7 @@ class FilterOperator(str, Enum):
 
     # TODO add more operators
     EQ = "=="  # default operator (string, int, float)
+    LIKE = "like"  # like operator (string)
     GT = ">"  # greater than (int, float)
     LT = "<"  # less than (int, float)
     NE = "!="  # not equal to (string, int, float)
@@ -72,7 +75,9 @@ class FilterOperator(str, Enum):
     NIN = "nin"  # Not in array (string or number)
     ANY = "any"  # Contains any (array of strings)
     ALL = "all"  # Contains all (array of strings)
-    TEXT_MATCH = "text_match"  # full text match (allows you to search for a specific substring, token or phrase within the text field)
+    TEXT_MATCH = (
+        "text_match"  # full text match (allows you to search for a specific substring, token or phrase within the text field)
+    )
     CONTAINS = "contains"  # metadata array contains value (string or number)
 
 
@@ -137,10 +142,7 @@ class MetadataFilters(BaseModel):
     condition: Optional[FilterCondition] = FilterCondition.AND
 
     @classmethod
-    @deprecated(
-        "`from_dict()` is deprecated. "
-        "Please use `MetadataFilters(filters=.., condition='and')` directly instead."
-    )
+    @deprecated("`from_dict()` is deprecated. " "Please use `MetadataFilters(filters=.., condition='and')` directly instead.")
     def from_dict(cls, filter_dict: Dict) -> "MetadataFilters":
         """Create MetadataFilters from json."""
         filters = []
@@ -166,9 +168,7 @@ class MetadataFilters(BaseModel):
 
         """
         return cls(
-            filters=[
-                MetadataFilter.from_dict(filter_dict) for filter_dict in filter_dicts
-            ],
+            filters=[MetadataFilter.from_dict(filter_dict) for filter_dict in filter_dicts],
             condition=condition,
         )
 
@@ -178,8 +178,7 @@ class MetadataFilters(BaseModel):
         for filter in self.filters:
             if filter.operator != FilterOperator.EQ:
                 raise ValueError(
-                    "Vector Store only supports exact match filters. "
-                    "Please use ExactMatchFilter or FilterOperator.EQ instead."
+                    "Vector Store only supports exact match filters. " "Please use ExactMatchFilter or FilterOperator.EQ instead."
                 )
             filters.append(ExactMatchFilter(key=filter.key, value=filter.value))
         return filters
@@ -296,9 +295,7 @@ class VectorStore(Protocol):
         """Query vector store."""
         ...
 
-    async def aquery(
-        self, query: VectorStoreQuery, **kwargs: Any
-    ) -> VectorStoreQueryResult:
+    async def aquery(self, query: VectorStoreQuery, **kwargs: Any) -> VectorStoreQueryResult:
         """
         Asynchronously query vector store.
         NOTE: this is not implemented for all vector stores. If not implemented,
@@ -306,9 +303,7 @@ class VectorStore(Protocol):
         """
         return self.query(query, **kwargs)
 
-    def persist(
-        self, persist_path: str, fs: Optional[fsspec.AbstractFileSystem] = None
-    ) -> None:
+    def persist(self, persist_path: str, fs: Optional[fsspec.AbstractFileSystem] = None) -> None:
         return None
 
 
@@ -405,9 +400,7 @@ class BasePydanticVectorStore(BaseComponent, ABC):
     def query(self, query: VectorStoreQuery, **kwargs: Any) -> VectorStoreQueryResult:
         """Query vector store."""
 
-    async def aquery(
-        self, query: VectorStoreQuery, **kwargs: Any
-    ) -> VectorStoreQueryResult:
+    async def aquery(self, query: VectorStoreQuery, **kwargs: Any) -> VectorStoreQueryResult:
         """
         Asynchronously query vector store.
         NOTE: this is not implemented for all vector stores. If not implemented,
@@ -415,7 +408,5 @@ class BasePydanticVectorStore(BaseComponent, ABC):
         """
         return self.query(query, **kwargs)
 
-    def persist(
-        self, persist_path: str, fs: Optional[fsspec.AbstractFileSystem] = None
-    ) -> None:
+    def persist(self, persist_path: str, fs: Optional[fsspec.AbstractFileSystem] = None) -> None:
         return None
