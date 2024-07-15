@@ -3,26 +3,12 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
-from typing import (
-    Any,
-    Dict,
-    List,
-    Optional,
-    Protocol,
-    Sequence,
-    Union,
-    runtime_checkable,
-)
+from typing import Any, Dict, List, Optional, Protocol, Sequence, Union, runtime_checkable
 
 import fsspec
 from deprecated import deprecated
 
-from llama_index.core.bridge.pydantic import (
-    BaseModel,
-    StrictFloat,
-    StrictInt,
-    StrictStr,
-)
+from llama_index.core.bridge.pydantic import BaseModel, StrictFloat, StrictInt, StrictStr
 from llama_index.core.schema import BaseComponent, BaseNode, TextNode
 
 DEFAULT_PERSIST_DIR = "./storage"
@@ -66,6 +52,7 @@ class FilterOperator(str, Enum):
     # TODO add more operators
     EQ = "=="  # default operator (string, int, float)
     LIKE = "like"  # like operator (string)
+    TSQUERY = "@@"  # tsquery operator (string)
     GT = ">"  # greater than (int, float)
     LT = "<"  # less than (int, float)
     NE = "!="  # not equal to (string, int, float)

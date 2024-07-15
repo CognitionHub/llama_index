@@ -19,10 +19,7 @@ from llama_index.core.vector_stores.types import (
     VectorStoreQueryMode,
     VectorStoreQueryResult,
 )
-from llama_index.core.vector_stores.utils import (
-    metadata_dict_to_node,
-    node_to_metadata_dict,
-)
+from llama_index.core.vector_stores.utils import metadata_dict_to_node, node_to_metadata_dict
 
 
 class DBEmbeddingRow(NamedTuple):
@@ -368,6 +365,8 @@ class PGVectorStore(BasePydanticVectorStore):
             return "NOT IN"
         elif operator == FilterOperator.CONTAINS:
             return "@>"
+        elif operator == FilterOperator.TSQUERY:
+            return "@@"
         else:
             _logger.warning(f"Unknown operator: {operator}, fallback to '='")
             return "="
@@ -389,6 +388,12 @@ class PGVectorStore(BasePydanticVectorStore):
                 f"metadata_::jsonb->'{filter_.key}' "
                 f"{self._to_postgres_operator(filter_.operator)} "
                 f"'[\"{filter_.value}\"]'"
+            )
+        elif filter_.operator == FilterOperator.TSQUERY:
+            return text(
+                f"metadata_{filter_.key}_tsvector "
+                f"{self._to_postgres_operator(filter_.operator)} "
+                f"phraseto_tsquery('{filter_.value}')"
             )
         else:
             # Check if value is a number. If so, cast the metadata value to a float
